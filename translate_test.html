@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Översättningstest</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+    textarea { width: 100%; min-height: 100px; margin-bottom: 10px; font-size: 16px; }
+    .output { padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <h2>🧪 Översättningstest</h2>
+  <p>Skriv persisk text nedan, översättningen till svenska visas automatiskt:</p>
+  <textarea id="inputFA" placeholder="اینجا به زبان فارسی بنویسید"></textarea>
+  <p>🔄 Status: <span id="status">Väntar...</span></p>
+  <div class="output" id="outputSV"></div>
+
+  <script>
+    const input = document.getElementById("inputFA");
+    const output = document.getElementById("outputSV");
+    const status = document.getElementById("status");
+
+    input.addEventListener("input", () => {
+      const text = input.value.trim();
+      if (!text) {
+        output.textContent = "";
+        status.textContent = "Väntar...";
+        return;
+      }
+
+      status.textContent = "Översätter...";
+      fetch("translate_api.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text, from: "fa", to: "sv" })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.translated) {
+          output.textContent = data.translated;
+          status.textContent = "✅ Översatt";
+        } else {
+          output.textContent = "❌ " + (data.error || "Okänt fel");
+          status.textContent = "❌ Fel";
+        }
+      })
+      .catch(err => {
+        output.textContent = "❌ Fetch-fel: " + err;
+        status.textContent = "❌";
+      });
+    });
+  </script>
+</body>
+</html>
